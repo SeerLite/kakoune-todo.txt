@@ -59,6 +59,7 @@ add-highlighter global/todotxt/keyword regex "(\+[^\+|^ |^\n]+)" 0:keyword      
 add-highlighter global/todotxt/meta regex "(@[^\+|^ |^\n]+)" 0:meta                    # @context
 add-highlighter global/todotxt/date regex "(\d{4}-\d{2}-\d{2})" 0:TodoDate             # date
 
-hook -group todotxt-highlight global WinSetOption filetype=todotxt %{ add-highlighter window ref todotxt }
-hook -group todotxt-highlight global WinSetOption filetype=(?!todotxt).* %{ remove-highlighter window/todotxt }
-
+hook -group todotxt-highlight global WinSetOption filetype=todotxt %{
+  add-highlighter window ref todotxt
+  hook -once -always window WinSetOption filetype=.* %{ remove-highlighter window/todotxt }
+}
