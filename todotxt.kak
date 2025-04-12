@@ -79,9 +79,11 @@ add-highlighter shared/todotxt group
 add-highlighter shared/todotxt/comment regex "^x ([^\n]+)" 0:comment
 # Priorities
 add-highlighter shared/todotxt/priority group
-add-highlighter shared/todotxt/priority/ regex "^\(A\)" 0:TodotxtPriorityA
-add-highlighter shared/todotxt/priority/ regex "^\(B\)" 0:TodotxtPriorityB
-add-highlighter shared/todotxt/priority/ regex "^\(C\)" 0:TodotxtPriorityC
+evaluate-commands %sh{
+    for letter in A B C D E F G H I J K L M N O P Q R S T U V W X Y Z; do
+        printf 'add-highlighter shared/todotxt/priority/ regex "^\\(%s\\)" 0:TodotxtPriority%s\n' $letter $letter
+    done
+}
 # Key/value tags
 add-highlighter shared/todotxt/key-value regex "([^:|^ ]+:)([^ |^\n]+)" 0:string 1:variable
 # Project (+) and context (@) tags
