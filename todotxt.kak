@@ -1,7 +1,7 @@
 # Detection
 # ‾‾‾‾‾‾‾‾‾
 
-hook global BufCreate .*[.]?(todo\.txt) %{
+hook global WinSetOption filetype=todotxt %{
     set-option buffer filetype todotxt
 
     define-command -hidden todo-done2bottom %{
