@@ -75,14 +75,20 @@ set-face global TodotxtDate default+b
 
 
 add-highlighter shared/todotxt group
-add-highlighter shared/todotxt/comment regex "^x ([^\n]+)" 0:comment                        # done items
-add-highlighter shared/todotxt/priority-a regex "^\(A\)" 0:TodotxtPriorityA                 # priority (A)
-add-highlighter shared/todotxt/priority-b regex "^\(B\)" 0:TodotxtPriorityB                 # priority (B)
-add-highlighter shared/todotxt/priority-c regex "^\(C\)" 0:TodotxtPriorityC                 # priority (C)
-add-highlighter shared/todotxt/key-value regex "([^:|^ ]+:)([^ |^\n]+)" 0:string 1:variable # key:value
-add-highlighter shared/todotxt/function regex "(\+[^\+|^ |^\n]+)" 0:function                # +project
-add-highlighter shared/todotxt/meta regex "(@[^\+|^ |^\n]+)" 0:meta                         # @context
-add-highlighter shared/todotxt/date regex "(\d{4}-\d{2}-\d{2})" 0:TodotxtDate               # date
+# Done items
+add-highlighter shared/todotxt/comment regex "^x ([^\n]+)" 0:comment
+# Priorities
+add-highlighter shared/todotxt/priority group
+add-highlighter shared/todotxt/priority/ regex "^\(A\)" 0:TodotxtPriorityA
+add-highlighter shared/todotxt/priority/ regex "^\(B\)" 0:TodotxtPriorityB
+add-highlighter shared/todotxt/priority/ regex "^\(C\)" 0:TodotxtPriorityC
+# Key/value tags
+add-highlighter shared/todotxt/key-value regex "([^:|^ ]+:)([^ |^\n]+)" 0:string 1:variable
+# Project (+) and context (@) tags
+add-highlighter shared/todotxt/function regex "(\+[^\+|^ |^\n]+)" 0:function
+add-highlighter shared/todotxt/meta regex "(@[^\+|^ |^\n]+)" 0:meta
+# Dates
+add-highlighter shared/todotxt/date regex "(\d{4}-\d{2}-\d{2})" 0:TodotxtDate
 
 hook -group todotxt-highlight global WinSetOption filetype=todotxt %{
     add-highlighter window/todotxt ref todotxt
