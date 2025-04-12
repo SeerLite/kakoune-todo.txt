@@ -76,9 +76,9 @@ set-face global TodotxtDate default+b
 
 add-highlighter shared/todotxt group
 add-highlighter shared/todotxt/comment regex "^x ([^\n]+)" 0:comment                        # done items
-add-highlighter shared/todotxt/prio-a regex "^\(A\)" 0:TodotxtPriorityA                     # priority (A)
-add-highlighter shared/todotxt/prio-b regex "^\(B\)" 0:TodotxtPriorityB                     # priority (B)
-add-highlighter shared/todotxt/prio-c regex "^\(C\)" 0:TodotxtPriorityC                     # priority (C)
+add-highlighter shared/todotxt/priority-a regex "^\(A\)" 0:TodotxtPriorityA                 # priority (A)
+add-highlighter shared/todotxt/priority-b regex "^\(B\)" 0:TodotxtPriorityB                 # priority (B)
+add-highlighter shared/todotxt/priority-c regex "^\(C\)" 0:TodotxtPriorityC                 # priority (C)
 add-highlighter shared/todotxt/key-value regex "([^:|^ ]+:)([^ |^\n]+)" 0:string 1:variable # key:value
 add-highlighter shared/todotxt/function regex "(\+[^\+|^ |^\n]+)" 0:function                # +project
 add-highlighter shared/todotxt/meta regex "(@[^\+|^ |^\n]+)" 0:meta                         # @context
