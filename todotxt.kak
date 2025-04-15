@@ -42,17 +42,26 @@ hook global WinSetOption filetype=todotxt %{
         }
     }
 
-    # Only set in buffer scope in *todotxt-filter* buffer
     declare-option -hidden str todotxt_file_buffer
+    declare-option -hidden str-list todotxt_filter_jump_final_selections
 
     define-command -hidden todotxt-filter-jump %{
-        evaluate-commands -save-regs l %{
-            evaluate-commands -draft %{
-                execute-keys x '"' l *
+        set-option global todotxt_filter_jump_final_selections
+        evaluate-commands -draft %{
+            execute-keys <a-s>
+            evaluate-commands -itersel -draft -save-regs l %{
+                evaluate-commands -draft %{
+                    execute-keys x <a-K> '^$' <ret> '"' l *
+                }
+                evaluate-commands -buffer %opt{todotxt_file_buffer} %{
+                    execute-keys '%' '"' l s <ret>
+                    set-option -add global todotxt_filter_jump_final_selections %val{selection_desc}
+                }
             }
-            buffer %opt{todotxt_file_buffer}
-            execute-keys g e '"' l n
         }
+        buffer %opt{todotxt_file_buffer}
+        select %opt{todotxt_filter_jump_final_selections}
+        set-option global todotxt_filter_jump_final_selections
     }
     define-command -docstring 'filter todo entries' todotxt-filter -params 1 %{
         evaluate-commands -save-regs rb -draft %{
