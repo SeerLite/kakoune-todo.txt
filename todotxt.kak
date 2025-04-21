@@ -64,6 +64,7 @@ hook global WinSetOption filetype=todotxt %{
         set-option global todotxt_filter_jump_final_selections
     }
     define-command -docstring 'filter todo entries' todotxt-filter -params 1 %{
+        try %{delete-buffer *todotxt-filter*}
         evaluate-commands -save-regs rb -draft %{
             set-register b %val{bufname}
             execute-keys '%' <a-s> "<a-k>\Q%arg{1}\E<ret>" '"' r y
@@ -72,6 +73,7 @@ hook global WinSetOption filetype=todotxt %{
             set-option buffer todotxt_file_buffer %reg{b}
             map buffer normal <ret> ': todotxt-filter-jump<ret>'
             execute-keys '%' d '"' r <a-P>
+            set-option buffer readonly true
         }
         buffer *todotxt-filter*
     }
