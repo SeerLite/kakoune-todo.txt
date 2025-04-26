@@ -4,18 +4,16 @@
 hook global WinSetOption filetype=todotxt %{
     set-option buffer filetype todotxt
 
-    define-command -hidden todotxt-done2bottom %{
-        try %{
-            execute-keys '%<a-s><a-k>^x <ret>dge<a-p>:echo %reg{#} items moved<ret>'
-        }
-    }
     define-command -docstring 'sort items by priority and state' todotxt-sort %{
-        evaluate-commands -draft %sh{
+        evaluate-commands %sh{
+            echo 'evaluate-commands -draft %{'
             for letter in Z Y X W V U T S R Q P O N M L K J I H G F E D C B A; do
                 echo "try %{execute-keys '%<a-s><a-k>^\($letter\) <ret>dgg<a-P>'}"
             done
+            echo "try %{execute-keys '%<a-s><a-k>^x <ret>dge<a-p>:echo %reg{#} items moved<ret>'}"
+            echo '}'
+            echo "select $kak_cursor_line.$kak_cursor_column,$kak_cursor_line.$kak_cursor_column"
         }
-        evaluate-commands -draft todotxt-done2bottom
     }
     define-command -docstring 'mark item under cursor as done' todotxt-mark-done %{
         try %{
