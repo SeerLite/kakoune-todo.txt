@@ -9,23 +9,13 @@ hook global WinSetOption filetype=todotxt %{
             execute-keys '%<a-s><a-k>^x <ret>dge<a-p>:echo %reg{#} items moved<ret>'
         }
     }
-    define-command -hidden todotxt-a2top %{
-        try %{
-            execute-keys '%<a-s><a-k>^\(A\) <ret>dgg<a-P>:echo %reg{#} items moved<ret>'
-        }
-    }
-    define-command -hidden todotxt-b2top %{
-        try %{
-            execute-keys '%<a-s><a-k>^\(B\) <ret>dgg<a-P>:echo %reg{#} items moved<ret>'
-        }
-    }
-    define-command -hidden todotxt-c2top %{
-        try %{
-            execute-keys '%<a-s><a-k>^\(C\) <ret>dgg<a-P>:echo %reg{#} items moved<ret>'
-        }
-    }
     define-command -docstring 'sort items by priority and state' todotxt-sort %{
-      execute-keys '%:todotxt-c2top<ret>:todotxt-b2top<ret>:todotxt-a2top<ret>:todotxt-done2bottom<ret>'
+        evaluate-commands -draft %sh{
+            for letter in Z Y X W V U T S R Q P O N M L K J I H G F E D C B A; do
+                echo "try %{execute-keys '%<a-s><a-k>^\($letter\) <ret>dgg<a-P>'}"
+            done
+        }
+        evaluate-commands -draft todotxt-done2bottom
     }
     define-command -docstring 'mark item under cursor as done' todotxt-mark-done %{
         try %{
