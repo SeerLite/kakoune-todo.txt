@@ -4,7 +4,8 @@
 hook global WinSetOption filetype=todotxt %{
     set-option buffer filetype todotxt
 
-    define-command -docstring 'sort items by priority and state' todotxt-sort %{
+    # TODO: Remove -override from all command definitions and make this a module
+    define-command -override -docstring 'sort items by priority and state' todotxt-sort %{
         evaluate-commands %sh{
             echo 'evaluate-commands -draft %{'
             for letter in Z Y X W V U T S R Q P O N M L K J I H G F E D C B A; do
@@ -15,14 +16,14 @@ hook global WinSetOption filetype=todotxt %{
             echo "select $kak_cursor_line.$kak_cursor_column,$kak_cursor_line.$kak_cursor_column"
         }
     }
-    define-command -docstring 'mark item under cursor as done' todotxt-mark-done %{
+    define-command -override -docstring 'mark item under cursor as done' todotxt-mark-done %{
         try %{
             execute-keys 'xs\([ABC]\) <ret>cx <esc>'
         } catch %{
             execute-keys 'ghix <esc>'
         }
     }
-    define-command -docstring 'mark item under cursor as high priority' -params 1 todotxt-mark-prio %{
+    define-command -override -docstring 'mark item under cursor as high priority' -params 1 todotxt-mark-prio %{
         try %{
             execute-keys "xs^(\([ABC]\)|x) <ret>c(%arg{1}) <esc>"
         } catch %{
@@ -33,7 +34,7 @@ hook global WinSetOption filetype=todotxt %{
     declare-option -hidden str todotxt_file_buffer
     declare-option -hidden str-list todotxt_filter_jump_final_selections
 
-    define-command -hidden todotxt-filter-jump %{
+    define-command -override -hidden todotxt-filter-jump %{
         set-option global todotxt_filter_jump_final_selections
         evaluate-commands -draft %{
             execute-keys <a-s>
@@ -51,7 +52,7 @@ hook global WinSetOption filetype=todotxt %{
         select %opt{todotxt_filter_jump_final_selections}
         set-option global todotxt_filter_jump_final_selections
     }
-    define-command -docstring 'filter todo entries' todotxt-filter -params 1 %{
+    define-command -override -docstring 'filter todo entries' todotxt-filter -params 1 %{
         evaluate-commands -save-regs rb -draft %{
             set-register b %val{bufname}
             execute-keys '%' <a-s> "<a-k>\Q%arg{1}\E<ret>" '"' r y
