@@ -66,7 +66,7 @@ hook global WinSetOption filetype=todotxt %{
                 set-option buffer todotxt_file_buffer %reg{b}
                 map buffer normal <ret> ': todotxt-filter-jump<ret>'
             }
-            execute-keys '"' r <a-P>
+            execute-keys '"' r <a-P> gj d
             set-option buffer readonly true
         }
         buffer *todotxt-filter*
