@@ -48,6 +48,7 @@ hook global WinSetOption filetype=todotxt %{
         select %opt{todotxt_filter_jump_final_selections}
         set-option global todotxt_filter_jump_final_selections
     }
+
     define-command -override -docstring 'filter todo entries' todotxt-filter -params 1 %{
         evaluate-commands -save-regs r -draft %{
             # Create the filter buffer if it doesn't exist
@@ -77,7 +78,6 @@ set-face global TodotxtPriorityA red+b
 set-face global TodotxtPriorityB yellow+b
 set-face global TodotxtPriorityC cyan+b
 set-face global TodotxtDate default+b
-
 
 add-highlighter shared/todotxt group
 # Done items
