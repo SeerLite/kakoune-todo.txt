@@ -8,20 +8,6 @@ hook global WinSetOption filetype=todotxt %{
     define-command -override -docstring 'sort items by priority and state' todotxt-sort %{
         execute-keys -draft '%' | 'sort --stable --key=1,1' <ret>
     }
-    define-command -override -docstring 'mark item under cursor as done' todotxt-mark-done %{
-        try %{
-            execute-keys 'xs\([ABC]\) <ret>cx <esc>'
-        } catch %{
-            execute-keys 'ghix <esc>'
-        }
-    }
-    define-command -override -docstring 'mark item under cursor as high priority' -params 1 todotxt-mark-prio %{
-        try %{
-            execute-keys "xs^(\([ABC]\)|x) <ret>c(%arg{1}) <esc>"
-        } catch %{
-            execute-keys "ghi(%arg{1}) <esc>"
-        }
-    }
 
     declare-option -hidden str todotxt_file_buffer
     declare-option -hidden str-list todotxt_filter_jump_final_selections
