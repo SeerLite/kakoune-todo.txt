@@ -6,15 +6,7 @@ hook global WinSetOption filetype=todotxt %{
 
     # TODO: Remove -override from all command definitions and make this a module
     define-command -override -docstring 'sort items by priority and state' todotxt-sort %{
-        evaluate-commands %sh{
-            echo 'evaluate-commands -draft %{'
-            for letter in Z Y X W V U T S R Q P O N M L K J I H G F E D C B A; do
-                echo "try %{execute-keys '%<a-s><a-k>^\($letter\) <ret>dgg<a-P>'}"
-            done
-            echo "try %{execute-keys '%<a-s><a-k>^x <ret>dge<a-p>:echo %reg{#} items moved<ret>'}"
-            echo '}'
-            echo "select $kak_cursor_line.$kak_cursor_column,$kak_cursor_line.$kak_cursor_column"
-        }
+        execute-keys -draft '%' | 'sort --stable --key=1,1' <ret>
     }
     define-command -override -docstring 'mark item under cursor as done' todotxt-mark-done %{
         try %{
