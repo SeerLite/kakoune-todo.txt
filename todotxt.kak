@@ -97,6 +97,10 @@ add-highlighter shared/todotxt/meta regex "(@[^\+|^ |^\n]+)" 0:meta
 # Dates
 add-highlighter shared/todotxt/date regex "(\d{4}-\d{2}-\d{2})" 0:TodotxtDate
 
+hook global WinSetOption filetype=todotxt %{
+    set-option buffer comment_line 'x'
+}
+
 hook -group todotxt-highlight global WinSetOption filetype=todotxt %{
     add-highlighter window/todotxt ref todotxt
     hook -once -always window WinSetOption filetype=.* %{
