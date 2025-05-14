@@ -11,37 +11,19 @@ hook global WinSetOption filetype=todotxt %{
 
     declare-option -hidden str todotxt_file_buffer
     declare-option -hidden str-list todotxt_filter_jump_final_selections
-    declare-option -hidden str-list todotxt_filter_original_locations
 
     define-command -override -hidden todotxt-filter-jump %{
         set-option global todotxt_filter_jump_final_selections
         evaluate-commands -draft %{
             execute-keys <a-s>
-            evaluate-commands %sh{
-                awk 'BEGIN {
-                    current_str = "'"$kak_selections_desc"'";
-                    orig_str = "'"$kak_opt_todotxt_filter_original_locations"'";
-                    split(current_str, current, " ");
-                    split(orig_str, orig, " ");
-
-                    printf "set-option global todotxt_filter_jump_final_selections "
-                    for (i = 1; i <= length(current); i++) {
-                        current_sel = current[i];
-
-                        current_line = current[i];
-                        sub(/\..*/, "", current_line);
-
-                        original_line = orig[current_line];
-                        sub(/\..*/, "", original_line);
-
-                        new_sel = current_sel;
-                        sub(/[0-9]+\./, original_line ".", new_sel);
-                        sub(/,[0-9]+\./, "," original_line ".", new_sel);
-
-                        printf " " new_sel;
-                    }
-                    printf "\n"
-                }'
+            evaluate-commands -itersel -draft -save-regs l %{
+                evaluate-commands -draft %{
+                    execute-keys x <a-K> '^$' <ret> '"' l *
+                }
+                evaluate-commands -buffer %opt{todotxt_file_buffer} %{
+                    execute-keys '%' '"' l s <ret>
+                    set-option -add global todotxt_filter_jump_final_selections %val{selection_desc}
+                }
             }
         }
         buffer %opt{todotxt_file_buffer}
@@ -50,23 +32,19 @@ hook global WinSetOption filetype=todotxt %{
     }
 
     define-command -override -docstring 'filter todo entries' todotxt-filter -params 1 %{
-        evaluate-commands -save-regs r -draft %{
-            # Create the filter buffer if it doesn't exist
-            evaluate-commands -draft %{
+        evaluate-commands -save-regs rb -draft %{
+            set-register b %val{bufname}
+            execute-keys '%' <a-s> <a-K> '^x ' <ret> <a-k> "\Q%arg{1}\E" <ret> '"' r y
+            try %{
+                buffer *todotxt-filter*
+                set-option buffer readonly false
+                execute-keys '%' d
+            } catch %{
                 edit -scratch *todotxt-filter*
+                set-option buffer filetype todotxt
+                set-option buffer todotxt_file_buffer %reg{b}
+                map buffer normal <ret> ':todotxt-filter-jump<ret>'
             }
-            set-option buffer=*todotxt-filter* todotxt_file_buffer %val{bufname}
-
-            # (
-            execute-keys '%' <a-s> <a-K> '^x ' <ret> <a-k> "\Q%arg{1}\E" <ret> ) '"' r y
-            set-option buffer=*todotxt-filter* todotxt_filter_original_locations %val{selections_desc}
-
-            buffer *todotxt-filter*
-            set-option buffer filetype todotxt
-            map buffer normal <ret> ':todotxt-filter-jump<ret>'
-
-            set-option buffer readonly false
-            execute-keys '%' d
             execute-keys '"' r <a-P> gj d
             set-option buffer readonly true
         }
