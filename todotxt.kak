@@ -11,6 +11,8 @@ hook global WinSetOption filetype=todotxt %{
 
     declare-option -hidden str todotxt_file_buffer
     declare-option -hidden str-list todotxt_filter_jump_final_selections
+    declare-option -hidden int todotxt_itersel_cursor_column
+    declare-option -hidden int todotxt_itersel_anchor_column
 
     define-command -override -hidden todotxt-filter-jump %{
         set-option global todotxt_filter_jump_final_selections
@@ -20,15 +22,22 @@ hook global WinSetOption filetype=todotxt %{
                 evaluate-commands -draft %{
                     execute-keys x <a-K> '^$' <ret> '"' l *
                 }
+                set-option global todotxt_itersel_cursor_column %val{cursor_column}
+                execute-keys '<a-;>'
+                set-option global todotxt_itersel_anchor_column %val{cursor_column}
                 evaluate-commands -buffer %opt{todotxt_file_buffer} %{
                     execute-keys '%' '"' l s <ret>
+                    select "%val{cursor_line}.%opt{todotxt_itersel_cursor_column},%val{cursor_line}.%opt{todotxt_itersel_anchor_column}"
                     set-option -add global todotxt_filter_jump_final_selections %val{selection_desc}
                 }
+                set-option global todotxt_itersel_cursor_column 0
+                set-option global todotxt_itersel_anchor_column 0
             }
         }
         buffer %opt{todotxt_file_buffer}
         select %opt{todotxt_filter_jump_final_selections}
         set-option global todotxt_filter_jump_final_selections
+        execute-keys ';'
     }
 
     define-command -override -docstring 'filter todo entries' todotxt-filter -params 1 %{
