@@ -43,7 +43,7 @@ hook global WinSetOption filetype=todotxt %{
     define-command -override -docstring 'filter todo entries' todotxt-filter -params 1 %{
         evaluate-commands -save-regs rb -draft %{
             set-register b %val{bufname}
-            execute-keys '%' <a-s> <a-K> '^x ' <ret> <a-k> "\Q%arg{1}\E" <ret> '"' r y
+            execute-keys '%' <a-s> <a-K> '^x ' <ret> <a-k> "%arg{1}" <ret> '"' r y
             try %{
                 buffer *todotxt-filter*
                 set-option buffer readonly false
