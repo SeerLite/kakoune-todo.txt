@@ -59,6 +59,29 @@ hook global WinSetOption filetype=todotxt %{
         }
         buffer *todotxt-filter*
     }
+
+    define-command -override -docstring 'filter due todo entries, sorted by due date' todotxt-filter-due %{
+        evaluate-commands -save-regs rb -draft %{
+            set-register b %val{bufname}
+            execute-keys '%' <a-s> <a-K> '^x ' <ret> <a-k> '\bdue:\S+\b' <ret> '"' r y
+            try %{
+                buffer *todotxt-filter-due*
+                set-option buffer readonly false
+                execute-keys '%' d
+            } catch %{
+                edit -scratch *todotxt-filter-due*
+                set-option buffer filetype todotxt
+                set-option buffer todotxt_file_buffer %reg{b}
+                map buffer normal <ret> ':todotxt-filter-jump<ret>'
+            }
+            execute-keys '"' r <a-P> gj d
+            execute-keys '%' s '\bdue:\S+\b' <ret> y gh P a ' ' <esc>
+            execute-keys '%' | "sort -n" <ret>
+            execute-keys '%' s '^due:\S+\b ' <ret> d
+            set-option buffer readonly true
+        }
+        buffer *todotxt-filter-due*
+    }
 }
 
 set-face global TodotxtPriorityA red+b
