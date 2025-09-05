@@ -75,9 +75,9 @@ hook global WinSetOption filetype=todotxt %{
                 map buffer normal <ret> ':todotxt-filter-jump<ret>'
             }
             execute-keys '"' r <a-P> gj d
-            execute-keys '%' s '\bdue:\S+\b' <ret> y gh P a ' ' <esc>
-            execute-keys '%' | "sort -n" <ret>
-            execute-keys '%' s '^due:\S+\b ' <ret> d
+            execute-keys '%' 1 s '\bdue:(\S+)\b' <ret> y gh P a ' ' <esc> H s '\D' <ret> d
+            execute-keys '%' | "sort -ns" <ret>
+            execute-keys '%' s '^\d+ ' <ret> d
             set-option buffer readonly true
         }
         buffer *todotxt-filter-due*
