@@ -1,11 +1,8 @@
 # Detection
 # ‾‾‾‾‾‾‾‾‾
 
-hook global WinSetOption filetype=todotxt %{
-    set-option buffer filetype todotxt
-
-    # TODO: Remove -override from all command definitions and make this a module
-    define-command -override -docstring 'sort items by priority and state' todotxt-sort %{
+provide-module todotxt %{
+    define-command -docstring 'sort items by priority and state' todotxt-sort %{
         execute-keys -draft '%' | 'sort --stable --key=1,1' <ret>
     }
 
@@ -14,7 +11,7 @@ hook global WinSetOption filetype=todotxt %{
     declare-option -hidden int todotxt_itersel_cursor_column
     declare-option -hidden int todotxt_itersel_anchor_column
 
-    define-command -override -hidden todotxt-filter-jump %{
+    define-command -hidden todotxt-filter-jump %{
         set-option global todotxt_filter_jump_final_selections
         evaluate-commands -draft %{
             execute-keys <a-s>
@@ -40,44 +37,106 @@ hook global WinSetOption filetype=todotxt %{
         execute-keys ';'
     }
 
-    define-command -override -docstring 'filter todo entries' todotxt-filter -params 1 %{
+    declare-option -hidden str todotxt_filter_yank_command
+
+    define-command -hidden todotxt-update-filter-buffer -params 1 %{
+        evaluate-commands -save-regs rc -draft -buffer %arg{1} %{
+            evaluate-commands -buffer %opt{todotxt_file_buffer} %opt{todotxt_filter_yank_command}
+
+            # Merge selections
+            evaluate-commands -draft %{
+                edit -scratch *todotxt-tmp*
+                execute-keys '"' r <a-P> gj d
+                execute-keys '%' '"' r y
+                delete-buffer *todotxt-tmp*
+            }
+
+            set-option buffer readonly false
+            execute-keys '%' | %{printf '%s' "$kak_reg_r"} <ret>
+            set-option buffer readonly true
+        }
+    }
+
+    define-command -docstring 'filter todo entries' todotxt-filter -params 1 %{
         evaluate-commands -save-regs rb -draft %{
             set-register b %val{bufname}
             execute-keys '%' <a-s> <a-K> '^x ' <ret> <a-k> "%arg{1}" <ret> '"' r y
+
+            # Merge selections
+            evaluate-commands -draft %{
+                edit -scratch *todotxt-tmp*
+                execute-keys '"' r <a-P> gj d
+                execute-keys '%' '"' r y
+                delete-buffer *todotxt-tmp*
+            }
+
             try %{
                 buffer *todotxt-filter*
                 set-option buffer readonly false
-                execute-keys '%' d
             } catch %{
                 edit -scratch *todotxt-filter*
                 set-option buffer filetype todotxt
                 set-option buffer todotxt_file_buffer %reg{b}
                 map buffer normal <ret> ':todotxt-filter-jump<ret>'
             }
-            execute-keys '"' r <a-P> gj d
+            remove-hooks "buffer=%opt{todotxt_file_buffer}" todotxt-filter-update
+            hook -group todotxt-filter-update "buffer=%opt{todotxt_file_buffer}" NormalIdle .* %{
+                todotxt-update-filter-buffer *todotxt-filter*
+            }
+            set-option buffer todotxt_filter_yank_command %exp{
+                execute-keys '%%' <a-s> <a-K> '^x ' <ret> <a-k> %arg{1} <ret>
+                execute-keys '"' r y
+            }
+            execute-keys '%' | %{printf '%s' "$kak_reg_r"} <ret>
             set-option buffer readonly true
         }
         buffer *todotxt-filter*
     }
 
-    define-command -override -docstring 'filter due todo entries, sorted by due date' todotxt-filter-due %{
+    define-command -docstring 'filter due todo entries, sorted by due date' todotxt-filter-due %{
         evaluate-commands -save-regs rb -draft %{
             set-register b %val{bufname}
             execute-keys '%' <a-s> <a-K> '^x ' <ret> <a-k> '\bdue:\S+\b' <ret> '"' r y
+
+            # Merge selections
+            evaluate-commands -draft %{
+                edit -scratch *todotxt-tmp*
+                execute-keys '"' r <a-P> gj d
+                execute-keys '%' '"' r y
+                delete-buffer *todotxt-tmp*
+            }
+
             try %{
                 buffer *todotxt-filter-due*
                 set-option buffer readonly false
-                execute-keys '%' d
+                # execute-keys '%' d
             } catch %{
                 edit -scratch *todotxt-filter-due*
                 set-option buffer filetype todotxt
                 set-option buffer todotxt_file_buffer %reg{b}
                 map buffer normal <ret> ':todotxt-filter-jump<ret>'
             }
-            execute-keys '"' r <a-P> gj d
+            remove-hooks "buffer=%opt{todotxt_file_buffer}" todotxt-filter-due-update
+            hook -group todotxt-filter-due-update "buffer=%opt{todotxt_file_buffer}" NormalIdle .* %{
+                todotxt-update-filter-buffer *todotxt-filter-due*
+            }
+            execute-keys '%' | %{printf '%s' "$kak_reg_r"} <ret>
             execute-keys '%' 1 s '\bdue:(\S+)\b' <ret> y gh P a ' ' <esc> H s '\D' <ret> d
             execute-keys '%' | "sort -ns" <ret>
             execute-keys '%' s '^\d+ ' <ret> d
+            set-option buffer todotxt_filter_yank_command %{
+                execute-keys '%%' <a-s> <a-K> '^x ' <ret> <a-k> '\bdue:\S+\b' <ret>
+                execute-keys '"' r y
+                evaluate-commands -draft %{
+                    edit -scratch *todotxt-tmp*
+                    execute-keys '"' r <a-P> gj d
+                    execute-keys '%' 1 s '\bdue:(\S+)\b' <ret> y gh P a ' ' <esc> H s '\D' <ret> d
+                    execute-keys '%' | "sort -ns" <ret>
+                    execute-keys '%' s '^\d+ ' <ret> d
+                    execute-keys '%' '"' r y
+                    delete-buffer *todotxt-tmp*
+                }
+            }
             set-option buffer readonly true
         }
         buffer *todotxt-filter-due*
@@ -106,6 +165,12 @@ add-highlighter shared/todotxt/function regex "(\+[^\+|^ |^\n]+)" 0:function
 add-highlighter shared/todotxt/meta regex "(@[^\+|^ |^\n]+)" 0:meta
 # Dates
 add-highlighter shared/todotxt/date regex "(\d{4}-\d{2}-\d{2})" 0:TodotxtDate
+
+hook global WinSetOption filetype=todotxt %{
+    # Idk why this was set in the original code, see git log/blame
+    set-option buffer filetype todotxt
+    require-module todotxt
+}
 
 hook global WinSetOption filetype=todotxt %{
     set-option buffer comment_line 'x'
