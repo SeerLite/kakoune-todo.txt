@@ -122,7 +122,7 @@ provide-module todotxt %{
             }
             execute-keys '%' | %{printf '%s' "$kak_reg_r"} <ret>
             execute-keys '%' 1 s '\bdue:(\S+)\b' <ret> y gh P a ' ' <esc> H s '\D' <ret> d
-            execute-keys '%' | "sort -ns" <ret>
+            execute-keys '%' | "sort -s" <ret>
             execute-keys '%' s '^\d+ ' <ret> d
             set-option buffer todotxt_filter_yank_command %{
                 execute-keys '%%' <a-s> <a-K> '^x ' <ret> <a-k> '\bdue:\S+\b' <ret>
@@ -131,7 +131,7 @@ provide-module todotxt %{
                     edit -scratch *todotxt-tmp*
                     execute-keys '"' r <a-P> gj d
                     execute-keys '%' 1 s '\bdue:(\S+)\b' <ret> y gh P a ' ' <esc> H s '\D' <ret> d
-                    execute-keys '%' | "sort -ns" <ret>
+                    execute-keys '%' | "sort -s" <ret>
                     execute-keys '%' s '^\d+ ' <ret> d
                     execute-keys '%' '"' r y
                     delete-buffer *todotxt-tmp*
